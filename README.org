@@ -7,7 +7,7 @@ git_url=https://github.com/ding3my/bash-search.git
 cmd="git clone $git_url;"
 eval $cmd
 
-# append the printf result to your shell profile(e.g. ~/bash_profile). 
+# Append the printf result to your shell profile(e.g. ~/bash_profile). 
 git_name="$(basename $git_url .git)"
 printf "export PATH=\"\$PATH:$(pwd)/$git_name/\"\n"
 #+END_SRC
