@@ -19,7 +19,7 @@ ff $key1 $key2 $keyn
 ff $key1 $key2 $keyn -dir $dir # The default dir is "$(pwd)"
 #+END_SRC
 ** gg
-To find files whose content matches your key words.
+To find files whose content matches your key words and whose mime type is text.
 #+BEGIN_SRC  
 gg $key1 $key2 $keyn
 gg $key1 $key2 $keyn -dir $dir # The default dir is "$(pwd)"
