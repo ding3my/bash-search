@@ -1,0 +1,32 @@
+* Intro
+To search file and open it quickly in bash.
+* Ops
+** Installation
+#+BEGIN_SRC  
+git_url=https://github.com/ding3my/ss-tool.git
+cmd="git clone $git_url;"
+eval $cmd
+
+# append the printf result to your shell profile(e.g. ~/bash_profile). 
+git_name="$(basename $git_url .git)"
+printf "export PATH=\"\$PATH:$(pwd)/$git_name/\"\n"
+#+END_SRC
+* Use
+** ff
+To find files whose filename matches your key words.
+#+BEGIN_SRC  
+ff $key1 $key2 $keyn
+ff $key1 $key2 $keyn -dir $dir # The default dir is "$(pwd)"
+#+END_SRC
+** gg
+To find files whose content matches your key words.
+#+BEGIN_SRC  
+gg $key1 $key2 $keyn
+gg $key1 $key2 $keyn -dir $dir # The default dir is "$(pwd)"
+#+END_SRC
+** F
+To open file with the sequence number.
+#+BEGIN_SRC  
+F $num
+#+END_SRC
+* Dev

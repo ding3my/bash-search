@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+this_file="$(readlink --canonicalize-missing "${BASH_SOURCE[0]}")"
+this_file_name="$(basename "${this_file}")"
+this_dir="$(dirname "${this_file}")"
+this_dir_name="$(basename "${this_dir}")"
+
+def_dir="$(pwd)"
+pattern="*"
+
+args=("$@") #?
+for ((i=0; i < ${#args[@]}; i++)); do
+	arg="${args[i]}"
+	if [ "$arg" == "-dir" ]; then
+		def_dir="${args[i+1]}"
+		i=$((i+1))
+	else
+		pattern="${pattern}${arg}*"
+	fi
+done
+
+config_dir="$HOME/.$this_dir_name"
+result_file="$config_dir/find.txt"
+
+text="$(find "$def_dir" -name "$pattern")" # Get files whose name matched the pattern.
+text="$(printf "$text" | nl | sort --numeric-sort --key 1 --reverse )" # Add sequence number to text and reverse text.
+text="$(printf "$text" | sed -En 's|^ +||gp' )" # Convert text to tsv format.
+
+cmd=""
+cmd="$cmd mkdir -p \"$config_dir\";"
+cmd="$cmd printf \"$text\n\" | tee \"$result_file\";" # Save
+
+eval "$cmd"

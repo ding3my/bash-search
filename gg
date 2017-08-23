@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -euf -o pipefail # For safety
+
+this_file="$(readlink --canonicalize-missing "${BASH_SOURCE[0]}")"
+this_file_name="$(basename "${this_file}")"
+this_dir="$(dirname "${this_file}")"
+this_dir_name="$(basename "${this_dir}")"
+
+def_dir="$(pwd)"
+pattern=""
+
+args=("$@") #?
+for ((i=0; i < ${#args[@]}; i++)); do
+	arg="${args[i]}"
+	if [ "$arg" == "-dir" ]; then
+		def_dir="${args[i+1]}"
+		i=$((i+1))
+	else
+		pattern="${pattern}(?=.*${arg})"
+	fi
+done
+
+config_dir="$HOME/.$this_dir_name"
+result_file="$config_dir/find.txt"
+
+text_block="$(find . -type f -exec bash -c "file -i {} | grep 'text/' -q" \; -exec grep -P "$pattern" {} -H \;)" # Get the all text type files whose content match the pattern.
+text_block="$(printf "$text_block" | nl | sort --numeric-sort --key 1 --reverse )" # Add sequence number to text and reverse text.
+text_block="$(printf "$text_block" | sed -En 's|^ +||gp' | sed -En 's|:|\t|gp')" # Convert text to tsv format.
+
+cmd=""
+cmd="$cmd mkdir -p \"$config_dir\" ;"
+cmd="$cmd printf \"\$text_block\n\" |" # No need to preview the $text's content in $cmd variable, so to escape sign $.
+cmd="$cmd tee \"$result_file\" ;" # Save
+
+eval "$cmd"

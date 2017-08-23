@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+this_file="$(readlink --canonicalize-missing "${BASH_SOURCE[0]}")"
+this_file_name="$(basename "${this_file}")"
+this_dir="$(dirname "${this_file}")"
+this_dir_name="$(basename "${this_dir}")"
+
+num_selected="$1"
+
+config_dir="$HOME/.$this_dir_name"
+result_file="$config_dir/find.txt"
+
+cmd=$(cat "$result_file" | grep -P "^$num_selected\t.*" | awk 'BEGIN { FS = "\t" } ; { print "xdg-open "  "\"" $2 "\"" }';)
+
+read -ei "$cmd" && eval "$REPLY"
