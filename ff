@@ -28,6 +28,6 @@ text="$(printf "$text" | sed -En 's|^ +||gp' )" # Convert text to tsv format.
 
 cmd=""
 cmd="$cmd mkdir -p \"$config_dir\";"
-cmd="$cmd printf \"$text\n\" | tee \"$result_file\";" # Save
+cmd="$cmd printf \"\$text\n\" | tee \"$result_file\";" # Save
 
 eval "$cmd"

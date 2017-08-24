@@ -10,6 +10,7 @@ this_dir_name="$(basename "${this_dir}")"
 def_dir="$(pwd)"
 pattern=""
 
+# Parse arguments
 args=("$@") #?
 for ((i=0; i < ${#args[@]}; i++)); do
 	arg="${args[i]}"
@@ -21,16 +22,48 @@ for ((i=0; i < ${#args[@]}; i++)); do
 	fi
 done
 
+# Get paths of files whose mime type is text.
+text_block=$(
+IFS=$'\n'
+for f in $(find "$def_dir" -type f); do
+	mime_type="$(file -bi "$f")"
+	if [[ "$mime_type" == *"text/"* ]]; then
+		printf "$f\n"
+	fi
+done
+)
+
+text_block=$(
+IFS=$'\n'
+for f in $text_block; do
+	match_count="$(grep -Pc "$pattern" "$f")"
+	if [ "$match_count" != "0" ]; then
+		printf "$f\t$match_count\n"
+	fi
+done # | sort -n -k 2 -r -t$'\t' | nl | sed -rn "s|^ *||gp" | sort -n -k 1 -r -t$'\t'
+)
+
+cmd=""
+cmd="$cmd printf \"\$text_block\" | "
+cmd="$cmd sort -n -k 2 -r -t$'\t' | " # Reverse text by match count.
+cmd="$cmd nl | " # Add sequence number to text.
+cmd="$cmd sed -rn \"s|^ *||gp\" | " # Remove the head spaces.
+cmd="$cmd sort -n -k 1 -r -t$'\t'" # Reverse text by sequence number.
+text_block=$(eval "$cmd")
+
+
 config_dir="$HOME/.$this_dir_name"
 result_file="$config_dir/find.txt"
 
-text_block="$(find "$def_dir" -type f -exec bash -c "file -i {} | grep 'text/' -q" \; -exec grep -P "$pattern" {} -H \;)" # Get the all text type files whose content match the pattern.
-text_block="$(printf "$text_block" | nl | sort --numeric-sort --key 1 --reverse )" # Add sequence number to text and reverse text.
-text_block="$(printf "$text_block" | sed -En 's|^ +||gp' | sed -En 's|:|\t|gp')" # Convert text to tsv format.
+# text_block="$(find "$def_dir" -type f -exec bash -c "file -i {} | grep 'text/' -q" \; -exec grep -P "$pattern" {} -H \;)" # Get the all text type files whose content match the pattern.
+# bug
+
+# text_block="$(find "$def_dir" -type f -exec bash -c "file -i {} | grep 'text/' -q" \; )" # Get the all text type files whose content match the pattern.
+# text_block="$(printf "$text_block" | nl | sort --numeric-sort --key 1 --reverse )" # Add sequence number to text and reverse text.
+# text_block="$(printf "$text_block" | sed -En 's|^ +||gp' | sed -En 's|:|\t|gp')" # Convert text to tsv format.
 
 cmd=""
-cmd="$cmd mkdir -p \"$config_dir\" ;"
+cmd="$cmd mkdir -p \"$config_dir\" ;" # Make config directory.
 cmd="$cmd printf \"\$text_block\n\" |" # No need to preview the $text's content in $cmd variable, so to escape sign $.
-cmd="$cmd tee \"$result_file\" ;" # Save
-
+cmd="$cmd tee \"$result_file\" ;" # Save text to file.
 eval "$cmd"
