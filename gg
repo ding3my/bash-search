@@ -24,7 +24,7 @@ done
 config_dir="$HOME/.$this_dir_name"
 result_file="$config_dir/find.txt"
 
-text_block="$(find . -type f -exec bash -c "file -i {} | grep 'text/' -q" \; -exec grep -P "$pattern" {} -H \;)" # Get the all text type files whose content match the pattern.
+text_block="$(find "$def_dir" -type f -exec bash -c "file -i {} | grep 'text/' -q" \; -exec grep -P "$pattern" {} -H \;)" # Get the all text type files whose content match the pattern.
 text_block="$(printf "$text_block" | nl | sort --numeric-sort --key 1 --reverse )" # Add sequence number to text and reverse text.
 text_block="$(printf "$text_block" | sed -En 's|^ +||gp' | sed -En 's|:|\t|gp')" # Convert text to tsv format.
 
